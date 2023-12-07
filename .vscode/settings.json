@@ -1,0 +1,11 @@
+{
+    "cSpell.words": [
+        "datatransfer",
+        "Fulup",
+        "libafb",
+        "libocpp",
+        "librust",
+        "ocpp"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
+}
