@@ -15,13 +15,12 @@
  * limitations under the License.
  */
 use crate::impl_widget_trait;
+use crate::prelude::*;
 use std::any::Any;
 use std::cell::Cell;
 use std::ffi::CString;
 use std::mem;
 use std::os::raw;
-
-use crate::prelude::*;
 
 pub struct LvglButton {
     uid: &'static str,
@@ -72,10 +71,7 @@ impl LvglButton {
         self
     }
 
-    pub fn set_value(&self, label: &str) -> &Self
-    where
-        Self: LvglCommon,
-    {
+    pub fn set_value(&self, label: &str) -> &Self {
         unsafe {
             let text = match CString::new(label) {
                 Err(_) => CString::new("Non UTF8 label").unwrap(),
@@ -153,26 +149,105 @@ impl LvglLabel {
     }
 }
 
-pub struct LvglIcon {
+pub struct LvglPixButton {
     uid: &'static str,
     info: Cell<&'static str>,
     handle: *mut cglue::_lv_obj_t,
+    image: *mut cglue::_lv_obj_t,
     style: *mut cglue::lv_style_t,
     ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
 }
-impl_widget_trait!(LvglIcon, Icon);
-impl LvglIcon {
-    pub fn new(uid: &'static str, pixmap: &[u8], x_ofs: i16, y_ofs: i16) -> &'static Self {
+
+impl_widget_trait!(LvglPixButton, PixButton);
+impl LvglPixButton {
+    pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
-            let handle = cglue::lv_img_create(cglue::lv_scr_action());
-            cglue::lv_img_set_src(handle, pixmap as *const _ as *mut raw::c_void);
+            let handle = cglue::lv_btn_create(cglue::lv_scr_action());
+            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+
+            let image = cglue::lv_img_create(handle);
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
 
             let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
             cglue::lv_style_init(style);
             cglue::lv_obj_add_style(handle, style, 0);
 
-            let widget = LvglIcon {
+            let widget = LvglPixButton {
+                uid,
+                info: Cell::new(""),
+                handle,
+                style,
+                image,
+                ctrlbox: Cell::new(None),
+            };
+            Box::leak(Box::new(widget))
+        }
+    }
+
+    pub fn set_value<T>(&self, pixmap: T) -> &Self
+    where
+        LvglPixmap: ImgToVoid<T>,
+    {
+        let imgref = LvglPixmap::get_ref(pixmap);
+        unsafe {
+            cglue::lv_img_set_src(self.image, imgref);
+        }
+        self
+    }
+
+    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
+        if let Some(ctrlbox) = self.ctrlbox.get() {
+            match event {
+                LvglEvent::PRESSED => {}
+                //LvglEvent::CLICKED => {}
+                _ => return, // ignore other event
+            }
+            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
+        }
+    }
+}
+
+pub trait ImgToVoid<T> {
+    fn get_ref(image: T) -> *mut raw::c_void;
+}
+
+impl ImgToVoid<&[u8; 4]> for LvglPixmap {
+    fn get_ref(image: &[u8; 4]) -> *mut raw::c_void {
+        image as *const _ as *mut raw::c_void
+    }
+}
+
+impl ImgToVoid<&LvglImgDsc> for LvglPixmap {
+    fn get_ref(image: &LvglImgDsc) -> *mut raw::c_void {
+        image as *const _ as *mut raw::c_void
+    }
+}
+
+pub struct LvglPixmap {
+    uid: &'static str,
+    info: Cell<&'static str>,
+    handle: *mut cglue::_lv_obj_t,
+    style: *mut cglue::lv_style_t,
+    ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
+}
+
+impl_widget_trait!(LvglPixmap, Pixmap);
+impl LvglPixmap {
+    pub fn new<T>(uid: &'static str, pixmap: T, x_ofs: i16, y_ofs: i16) -> &'static Self
+    where
+        Self: ImgToVoid<T>,
+    {
+        let imgref = LvglPixmap::get_ref(pixmap);
+        unsafe {
+            let handle = cglue::lv_img_create(cglue::lv_scr_action());
+            cglue::lv_img_set_src(handle, imgref);
+            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            cglue::lv_style_init(style);
+            cglue::lv_obj_add_style(handle, style, 0);
+
+            let widget = LvglPixmap {
                 uid,
                 info: Cell::new(""),
                 handle,
@@ -182,15 +257,34 @@ impl LvglIcon {
             Box::leak(Box::new(widget))
         }
     }
-    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
-        if let Some(ctrlbox) = self.ctrlbox.get() {
-            match event {
-                LvglEvent::PRESSED => {}
-                //LvglEvent::CLICKED => {}
-                _ => return, // ignore other events
-            }
-            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
+
+    pub fn get_action(&self) -> &'static str {
+        &"['ON','OFF']"
+    }
+
+    pub fn set_value<T>(&self, pixmap: T) -> &Self
+    where
+        Self: ImgToVoid<T>,
+    {
+        let imgref = LvglPixmap::get_ref(pixmap);
+        unsafe {
+            cglue::lv_img_set_src(self.handle, imgref);
         }
+        self
+    }
+
+    pub fn set_angle(&self, rotation: i16) -> &Self {
+        unsafe {
+            cglue::lv_img_set_angle(self.handle, rotation);
+        }
+        self
+    }
+
+    pub fn set_zoom(&self, zoom: u16) -> &Self {
+        unsafe {
+            cglue::lv_img_set_zoom(self.handle, zoom);
+        }
+        self
     }
 }
 
@@ -230,14 +324,32 @@ impl LvglImage {
             Box::leak(Box::new(widget))
         }
     }
-    pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
-        if let Some(ctrlbox) = self.ctrlbox.get() {
-            match event {
-                LvglEvent::PRESSED => {}
-                _ => return, // ignore other events
-            }
-            unsafe { (*ctrlbox).callback(widget, self.uid, event) };
+    pub fn set_value<T>(&self, path: &str) -> &Self {
+        let mut img_path = path.to_string();
+        img_path.insert_str(0, "L:"); // ugly lvgl path pattern
+        let filepath = match CString::new(img_path) {
+            Err(_) => CString::new("Non UTF8 path").unwrap(),
+            Ok(value) => value,
+        };
+
+        unsafe {
+            cglue::lv_img_set_src(self.handle, filepath.as_ptr() as *mut raw::c_void);
         }
+        self
+    }
+
+    pub fn set_angle(&self, rotation: i16) -> &Self {
+        unsafe {
+            cglue::lv_img_set_angle(self.handle, rotation);
+        }
+        self
+    }
+
+    pub fn set_zoom(&self, zoom: u16) -> &Self {
+        unsafe {
+            cglue::lv_img_set_zoom(self.handle, zoom);
+        }
+        self
     }
 }
 

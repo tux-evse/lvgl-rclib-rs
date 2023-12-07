@@ -57,7 +57,7 @@ pub fn draw_date(x_ofs: i16, y_ofs: i16) {
 pub fn draw_label(x_ofs: i16, y_ofs: i16) {
     LvglLabel::new("Label-1", LvglMkFont::std_22(), x_ofs, y_ofs)
         .set_value("Demo Label widget")
-        .set_title("Labdel widget", 100, 75, LvglMkFont::std_10())
+        .set_title("Label widget", 100, 75, LvglMkFont::std_10())
         .set_size(300, 100)
         .set_color(LvglColor::rvb(0, 0, 0))
         .set_background(LvglColor::rvb(0xFF, 0xFF, 0xFF))
@@ -65,10 +65,10 @@ pub fn draw_label(x_ofs: i16, y_ofs: i16) {
 }
 
 pub fn draw_icon(x_ofs: i16, y_ofs: i16) {
-    LvglIcon::new("Icon-wifi", LvglPixmap::WIFI, x_ofs, y_ofs).set_info("Demo Wifi Icon");
-    LvglIcon::new("Icon-Nfc", LvglPixmap::SD_CARD, x_ofs + 25, y_ofs)
+    LvglPixmap::new("Icon-wifi", LvglIcon::WIFI, x_ofs, y_ofs).set_info("Demo Wifi Icon");
+    LvglPixmap::new("Icon-Nfc", LvglIcon::SD_CARD, x_ofs + 25, y_ofs)
         .set_color(LvglColor::rvb(255, 0, 0));
-    LvglIcon::new("Icon-Battery", LvglPixmap::BATTERY_2, x_ofs + 50, y_ofs);
+    LvglPixmap::new("Icon-Battery", LvglIcon::BATTERY_2, x_ofs + 50, y_ofs);
 }
 
 pub fn draw_led(x_ofs: i16, y_ofs: i16) {
@@ -123,15 +123,23 @@ pub fn draw_button(x_ofs: i16, y_ofs: i16) {
     LvglButton::new("Button-A", LvglMkFont::std_18(), x_ofs, y_ofs)
         .set_value("Test-1")
         .set_size(180, 100)
-        .set_callback(Box::new(WidgetEvtCtx {
+        .set_callback(Box::leak(Box::new(WidgetEvtCtx {
             test: "Draw-Button-1",
-        }));
+        })));
 
-    LvglButton::new("Button-B", LvglMkFont::std_14(), x_ofs + 50, y_ofs+120)
+    LvglButton::new("Button-B", LvglMkFont::std_14(), x_ofs + 45, y_ofs+120)
         .set_value("Test-2")
-        .set_callback(Box::new(WidgetEvtCtx {
+        .set_callback(Box::leak(Box::new(WidgetEvtCtx {
             test: "Draw-Button-2",
-        }));
+        })));
+
+    LvglPixButton::new("Button-Img",  x_ofs+50, y_ofs-50)
+        .set_value( LvglIcon::HOME)
+        .set_border(3, LvglColor::DEEP_PURPLE())
+        .set_callback(Box::leak(Box::new(WidgetEvtCtx {
+            test: "Draw-PixButton",
+        })));
+
 }
 
 pub fn draw_arc(x_ofs: i16, y_ofs: i16) {
@@ -141,7 +149,7 @@ pub fn draw_arc(x_ofs: i16, y_ofs: i16) {
 }
 
 pub fn draw_tux(x_ofs: i16, y_ofs: i16) {
-    let tux_path = LVGL_PRJ_DIR.to_string() + "/assets/tux-evsex250.png";
+    let tux_path = PRJ_DIR.to_string() + "/assets/tux-evsex250.png";
     LvglImage::new("tux-evse", tux_path.as_str(), x_ofs, y_ofs)
     .set_title("tux-evse mascot", 65, -20, LvglMkFont::std_14());
 }

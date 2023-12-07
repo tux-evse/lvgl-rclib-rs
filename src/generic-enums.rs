@@ -19,13 +19,18 @@ use crate::prelude::*;
 
 // exported cglue types
 pub type LvglPoint  = cglue::lv_point_t;
-pub const LVGL_PRJ_DIR:&str = cglue::PRJ_DIR;
+pub type LvglImgDsc= cglue::lv_img_dsc_t;
+
+// use only for test
+#[allow(dead_code)]
+pub(crate) const PRJ_DIR:&str = cglue::PRJ_DIR;
 
 pub enum LvglWidget {
     ImgButton(&'static LvglImgButton),
     Label(&'static LvglLabel),
     Button(&'static LvglButton),
-    Icon(&'static LvglIcon),
+    PixButton(&'static LvglPixButton),
+    Pixmap(&'static LvglPixmap),
     TextArea(&'static LvglTextArea),
     Led(&'static LvglLed),
     Line(&'static LvglLine),
@@ -47,21 +52,18 @@ impl LvglWidget {
         match self {
             LvglWidget::Button(this) => this.callback(self, event),
             LvglWidget::ImgButton(this) => this.callback(self, event),
-            LvglWidget::Icon(this) => this.callback(self, event),
-            LvglWidget::Image(this) => this.callback(self, event),
+            LvglWidget::PixButton(this) => this.callback(self, event),
             LvglWidget::Switch(this) => this.callback(self, event),
-            LvglWidget::Led(this) => this.callback(self, event),
             _ => {}
         }
     }
-    pub fn set_callback(&self, ctrlbox: Box<dyn LvglHandler>) {
+    pub fn set_callback(&self, ctrlbox: *mut dyn LvglHandler) {
         match self {
             LvglWidget::Button(this) => this.set_callback(ctrlbox),
             LvglWidget::ImgButton(this) => this.set_callback(ctrlbox),
-            LvglWidget::Icon(this) => this.set_callback(ctrlbox),
+            LvglWidget::PixButton(this) => this.set_callback(ctrlbox),
             LvglWidget::Image(this) => this.set_callback(ctrlbox),
             LvglWidget::Switch(this) => this.set_callback(ctrlbox),
-            LvglWidget::Led(this) => this.set_callback(ctrlbox),
             _ => {}
         }
     }
@@ -71,7 +73,7 @@ impl LvglWidget {
             LvglWidget::Label(this) => this.as_any(),
             LvglWidget::Button(this) => this.as_any(),
             LvglWidget::ImgButton(this) => this.as_any(),
-            LvglWidget::Icon(this) => this.as_any(),
+            LvglWidget::Pixmap(this) => this.as_any(),
             LvglWidget::TextArea(this) => this.as_any(),
             LvglWidget::Led(this) => this.as_any(),
             LvglWidget::Line(this) => this.as_any(),
@@ -81,6 +83,7 @@ impl LvglWidget {
             LvglWidget::Switch(this) => this.as_any(),
             LvglWidget::Bar(this) => this.as_any(),
             LvglWidget::Qrcode(this) => this.as_any(),
+            LvglWidget::PixButton(this) => this.as_any(),
         }
     }
 
@@ -89,7 +92,7 @@ impl LvglWidget {
             LvglWidget::Label(this) => this.get_uid(),
             LvglWidget::Button(this) => this.get_uid(),
             LvglWidget::ImgButton(this) => this.get_uid(),
-            LvglWidget::Icon(this) => this.get_uid(),
+            LvglWidget::Pixmap(this) => this.get_uid(),
             LvglWidget::TextArea(this) => this.get_uid(),
             LvglWidget::Led(this) => this.get_uid(),
             LvglWidget::Line(this) => this.get_uid(),
@@ -99,6 +102,7 @@ impl LvglWidget {
             LvglWidget::Switch(this) => this.get_uid(),
             LvglWidget::Bar(this) => this.get_uid(),
             LvglWidget::Qrcode(this) => this.get_uid(),
+            LvglWidget::PixButton(this) => this.get_uid(),
         }
     }
 }

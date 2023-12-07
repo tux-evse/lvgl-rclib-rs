@@ -34,7 +34,7 @@ pub trait LvglCommon {
     fn get_action(&self) -> &'static str {
         "[]"
     }
-    fn set_callback(&'static self, ctrlbox: Box<dyn LvglHandler>);
+    fn set_callback(&'static self, ctrlbox:*mut dyn LvglHandler);
     fn set_info(&self, info: &'static str) -> &Self;
     fn as_any(&self) -> &dyn Any;
 }
@@ -69,9 +69,9 @@ macro_rules! impl_widget_trait {
                 self
             }
             // if callback not set do it
-            fn set_callback(&'static self, ctrlbox: Box<dyn LvglHandler>) {
+            fn set_callback(&'static self, ctrlbox: *mut dyn LvglHandler) {
                 if let None = self.ctrlbox.get() {
-                    self.ctrlbox.set(Some(Box::leak(ctrlbox)));
+                    self.ctrlbox.set(Some(ctrlbox));
                     let context = Box::leak(Box::new(LvglWidget::$object(self)));
                     unsafe {
                         cglue::lv_obj_add_event_cb(

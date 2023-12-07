@@ -27,7 +27,7 @@ pub struct LvglImgButton {
     uid: &'static str,
     info: Cell<&'static str>,
     handle: *mut cglue::_lv_obj_t,
-        style: *mut cglue::lv_style_t,
+    style: *mut cglue::lv_style_t,
     ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
 }
 

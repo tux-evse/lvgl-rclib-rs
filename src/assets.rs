@@ -40,7 +40,6 @@ impl LvglColor {
         let handle = unsafe { cglue::lv_palette_main(palette) };
         LvglColor { handle }
     }
-
     impl_static_palette!(RED);
     impl_static_palette!(PINK);
     impl_static_palette!(PURPLE);
@@ -64,8 +63,8 @@ impl LvglColor {
     impl_static_palette!(NONE);
 }
 
-pub struct LvglPixmap;
-impl LvglPixmap {
+pub struct LvglIcon;
+impl LvglIcon {
     #![allow(dead_code)]
     pub const DUMMY: &'static [u8; 4] = b"\xEF\xA3\xBF\0";
     pub const BULLET: &'static [u8; 4] = b"\xE2\x80\xA2\0";
@@ -212,8 +211,9 @@ impl LvglEvent {
             15 => Self::DEFOCUSED,
             16 => Self::LEAVE,
             28 => Self::VALUE_CHANGED,
-
-            _ => Self::UNKNOWN,
+            _ => {
+                Self::UNKNOWN
+            },
         }
     }
 }
