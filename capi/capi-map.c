@@ -37,6 +37,7 @@
 
 const lv_point_t line_points[] = { {5, 5}, {70, 70}, {120, 10}, {180, 60}, {240, 10} };
 
+const short lv_size_contend = LV_COORD_SET_SPEC(2001);
 
 // import some usefull inline macro
 lv_color_t lv_color_mk(uint8_t r, uint8_t g, uint8_t b)

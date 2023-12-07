@@ -149,7 +149,18 @@ pub trait LvglMethod {
             cglue::lv_style_set_border_width(style, width);
             cglue::lv_style_set_border_color(style, color.handle);
             cglue::lv_obj_add_style(handle, style, cglue::LV_STATE_DEFAULT);
-            cglue::lv_obj_set_style_radius(
+        }
+        self
+    }
+
+    fn set_radius(&self) -> &Self
+    where
+        Self: LvglCommon,
+    {
+        let handle = self.get_handle();
+        unsafe {
+
+                cglue::lv_obj_set_style_radius(
                 handle,
                 cglue::LV_RADIUS_CIRCLE as i16,
                 cglue::LV_STATE_DEFAULT,

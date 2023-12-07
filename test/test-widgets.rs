@@ -123,18 +123,21 @@ pub fn draw_button(x_ofs: i16, y_ofs: i16) {
     LvglButton::new("Button-A", LvglMkFont::std_18(), x_ofs, y_ofs)
         .set_value("Test-1")
         .set_size(180, 100)
+        .set_border(3, LvglColor::DEEP_ORANGE())
         .set_callback(Box::leak(Box::new(WidgetEvtCtx {
             test: "Draw-Button-1",
         })));
 
-    LvglButton::new("Button-B", LvglMkFont::std_14(), x_ofs + 45, y_ofs+120)
+    LvglButton::new("Button-B", LvglMkFont::std_14(), x_ofs + 50, y_ofs+110)
         .set_value("Test-2")
         .set_callback(Box::leak(Box::new(WidgetEvtCtx {
             test: "Draw-Button-2",
         })));
 
-    LvglPixButton::new("Button-Img",  x_ofs+50, y_ofs-50)
+    LvglPixButton::new("Button-Img",  x_ofs+50, y_ofs-60)
         .set_value( LvglIcon::HOME)
+        .set_background(LvglColor::BLUE_GREY())
+        .set_title("Clickable", 8, 6, LvglMkFont::std_10())
         .set_border(3, LvglColor::DEEP_PURPLE())
         .set_callback(Box::leak(Box::new(WidgetEvtCtx {
             test: "Draw-PixButton",

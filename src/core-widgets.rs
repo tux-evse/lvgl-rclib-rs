@@ -166,7 +166,7 @@ impl LvglPixButton {
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
 
             let image = cglue::lv_img_create(handle);
-            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+            cglue::lv_obj_align(image, cglue::LV_ALIGN_CENTER as u8, 0, 0);
 
             let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
             cglue::lv_style_init(style);
@@ -193,6 +193,10 @@ impl LvglPixButton {
             cglue::lv_img_set_src(self.image, imgref);
         }
         self
+    }
+
+    pub fn get_action(&self) -> &'static str {
+        &"['ON','OFF']"
     }
 
     pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
