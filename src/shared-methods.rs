@@ -130,11 +130,9 @@ pub trait LvglMethod {
     where
         Self: LvglCommon,
     {
-        let handle = self.get_handle();
         let style = self.get_style();
         unsafe {
             cglue::lv_style_set_text_color(style, color.handle);
-            cglue::lv_obj_add_style(handle, style, cglue::LV_STATE_DEFAULT);
         }
         self
     }
@@ -143,12 +141,24 @@ pub trait LvglMethod {
     where
         Self: LvglCommon,
     {
-        let handle = self.get_handle();
         let style = self.get_style();
         unsafe {
             cglue::lv_style_set_border_width(style, width);
             cglue::lv_style_set_border_color(style, color.handle);
-            cglue::lv_obj_add_style(handle, style, cglue::LV_STATE_DEFAULT);
+        }
+        self
+    }
+
+    fn set_padding(&self, top: i16, botton:i16, right:i16, left:i16) -> &Self
+    where
+        Self: LvglCommon,
+    {
+        let style = self.get_style();
+        unsafe {
+            cglue::lv_style_set_pad_top(style, top);
+            cglue::lv_style_set_pad_bottom(style, botton);
+            cglue::lv_style_set_pad_right(style, right);
+            cglue::lv_style_set_pad_left(style, left);
         }
         self
     }
@@ -179,7 +189,7 @@ pub trait LvglMethod {
             cglue::lv_obj_align_to(
                 title,
                 handle,
-                cglue::LV_ALIGN_OUT_BOTTOM_LEFT as u8,
+                cglue::LV_ALIGN_BOTTOM_LEFT as u8,
                 x_ofs,
                 y_ofs,
             );
