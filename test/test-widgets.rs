@@ -95,11 +95,15 @@ pub fn draw_text(root: &LvglWidget,x_ofs: i16, y_ofs: i16) {
 
 pub fn draw_switch(root: &LvglWidget,x_ofs: i16, y_ofs: i16) {
     LvglSwitch::new(root,"Switch-1", x_ofs, y_ofs)
-        .set_check(false)
+        .set_title("Unlock", 0, 0, LvglMkFont::std_10())
+        .set_lock(false)
+        .set_value(false)
         .set_height(20);
 
     LvglSwitch::new(root,"Switch-2", x_ofs + 75, y_ofs)
-        .set_check(true)
+        .set_title("Locked", 0, 0, LvglMkFont::std_10())
+        .set_lock(true)
+        .set_value(true)
         .set_height(20);
 }
 

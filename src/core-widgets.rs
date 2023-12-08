@@ -33,7 +33,13 @@ pub struct LvglButton {
 
 impl_widget_trait!(LvglButton, Button);
 impl LvglButton {
-    pub fn new(parent: &LvglWidget, uid: &'static str, font: &LvglFont, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(
+        parent: &LvglWidget,
+        uid: &'static str,
+        font: &LvglFont,
+        x_ofs: i16,
+        y_ofs: i16,
+    ) -> &'static Self {
         unsafe {
             let handle = cglue::lv_btn_create(parent.get_handle());
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
@@ -103,7 +109,13 @@ pub struct LvglLabel {
 }
 impl_widget_trait!(LvglLabel, Label);
 impl LvglLabel {
-    pub fn new(parent: &LvglWidget, uid: &'static str, font: &LvglFont, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(
+        parent: &LvglWidget,
+        uid: &'static str,
+        font: &LvglFont,
+        x_ofs: i16,
+        y_ofs: i16,
+    ) -> &'static Self {
         unsafe {
             let handle = cglue::lv_label_create(parent.get_handle());
             cglue::lv_label_set_recolor(handle, false);
@@ -237,7 +249,13 @@ pub struct LvglPixmap {
 
 impl_widget_trait!(LvglPixmap, Pixmap);
 impl LvglPixmap {
-    pub fn new<T>(parent: &LvglWidget, uid: &'static str, pixmap: T, x_ofs: i16, y_ofs: i16) -> &'static Self
+    pub fn new<T>(
+        parent: &LvglWidget,
+        uid: &'static str,
+        pixmap: T,
+        x_ofs: i16,
+        y_ofs: i16,
+    ) -> &'static Self
     where
         Self: ImgToVoid<T>,
     {
@@ -301,7 +319,13 @@ pub struct LvglImage {
 }
 impl_widget_trait!(LvglImage, Image);
 impl LvglImage {
-    pub fn new(parent: &LvglWidget, uid: &'static str, path: &str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(
+        parent: &LvglWidget,
+        uid: &'static str,
+        path: &str,
+        x_ofs: i16,
+        y_ofs: i16,
+    ) -> &'static Self {
         let mut img_path = path.to_string();
         img_path.insert_str(0, "L:"); // ugly lvgl path pattern
         let filepath = match CString::new(img_path) {
@@ -556,7 +580,8 @@ pub struct LvglArc {
 }
 impl_widget_trait!(LvglArc, Arc);
 impl LvglArc {
-    pub fn new(parent: &LvglWidget,
+    pub fn new(
+        parent: &LvglWidget,
         uid: &'static str,
         angle_start: u16,
         angle_end: u16,
@@ -672,14 +697,23 @@ impl LvglSwitch {
         &"['ON','OFF']"
     }
 
-    pub fn set_check(&self, status: bool) -> &Self {
+    pub fn set_value(&self, on: bool) -> &Self {
         unsafe {
-            if status {
-                cglue::lv_obj_clear_state(self.handle, cglue::LV_STATE_DISABLED as u16);
+            if on {
                 cglue::lv_obj_add_state(self.handle, cglue::LV_STATE_CHECKED as u16);
             } else {
                 cglue::lv_obj_clear_state(self.handle, cglue::LV_STATE_CHECKED as u16);
+            }
+        }
+        self
+    }
+
+    pub fn set_lock(&self, lock: bool) -> &Self {
+        unsafe {
+            if lock {
                 cglue::lv_obj_add_state(self.handle, cglue::LV_STATE_DISABLED as u16);
+            } else {
+                cglue::lv_obj_clear_state(self.handle, cglue::LV_STATE_DISABLED as u16);
             }
         }
         self
@@ -704,7 +738,14 @@ pub struct LvglBar {
 }
 impl_widget_trait!(LvglBar, Bar);
 impl LvglBar {
-    pub fn new(parent: &LvglWidget, uid: &'static str, min: i32, max: i32, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(
+        parent: &LvglWidget,
+        uid: &'static str,
+        min: i32,
+        max: i32,
+        x_ofs: i16,
+        y_ofs: i16,
+    ) -> &'static Self {
         unsafe {
             let handle = cglue::lv_bar_create(parent.get_handle());
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
