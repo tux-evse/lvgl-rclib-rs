@@ -321,6 +321,10 @@ impl LvglHandle {
         self
     }
 
+    pub fn get_root_widget(&self) -> &'static LvglWidget {
+        &LvglWidget::Display()
+    }
+
     // notify lvgl how long we've been sleeping update event and return next expected wait in ms
     pub fn start_loop(&self) {
         thread::spawn(|| {

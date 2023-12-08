@@ -33,9 +33,9 @@ pub struct LvglButton {
 
 impl_widget_trait!(LvglButton, Button);
 impl LvglButton {
-    pub fn new(uid: &'static str, font: &LvglFont, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(parent: &LvglWidget, uid: &'static str, font: &LvglFont, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
-            let handle = cglue::lv_btn_create(cglue::lv_scr_action());
+            let handle = cglue::lv_btn_create(parent.get_handle());
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
 
             let button = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
@@ -103,9 +103,9 @@ pub struct LvglLabel {
 }
 impl_widget_trait!(LvglLabel, Label);
 impl LvglLabel {
-    pub fn new(uid: &'static str, font: &LvglFont, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(parent: &LvglWidget, uid: &'static str, font: &LvglFont, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
-            let handle = cglue::lv_label_create(cglue::lv_scr_action());
+            let handle = cglue::lv_label_create(parent.get_handle());
             cglue::lv_label_set_recolor(handle, false);
             cglue::lv_obj_set_style_text_align(handle, cglue::LV_TEXT_ALIGN_CENTER as u8, 0);
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
@@ -160,9 +160,9 @@ pub struct LvglPixButton {
 
 impl_widget_trait!(LvglPixButton, PixButton);
 impl LvglPixButton {
-    pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(parent: &LvglWidget, uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
-            let handle = cglue::lv_btn_create(cglue::lv_scr_action());
+            let handle = cglue::lv_btn_create(parent.get_handle());
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
 
             let image = cglue::lv_img_create(handle);
@@ -237,13 +237,13 @@ pub struct LvglPixmap {
 
 impl_widget_trait!(LvglPixmap, Pixmap);
 impl LvglPixmap {
-    pub fn new<T>(uid: &'static str, pixmap: T, x_ofs: i16, y_ofs: i16) -> &'static Self
+    pub fn new<T>(parent: &LvglWidget, uid: &'static str, pixmap: T, x_ofs: i16, y_ofs: i16) -> &'static Self
     where
         Self: ImgToVoid<T>,
     {
         let imgref = LvglPixmap::get_ref(pixmap);
         unsafe {
-            let handle = cglue::lv_img_create(cglue::lv_scr_action());
+            let handle = cglue::lv_img_create(parent.get_handle());
             cglue::lv_img_set_src(handle, imgref);
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
 
@@ -301,7 +301,7 @@ pub struct LvglImage {
 }
 impl_widget_trait!(LvglImage, Image);
 impl LvglImage {
-    pub fn new(uid: &'static str, path: &str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(parent: &LvglWidget, uid: &'static str, path: &str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         let mut img_path = path.to_string();
         img_path.insert_str(0, "L:"); // ugly lvgl path pattern
         let filepath = match CString::new(img_path) {
@@ -310,7 +310,7 @@ impl LvglImage {
         };
 
         unsafe {
-            let handle = cglue::lv_img_create(cglue::lv_scr_action());
+            let handle = cglue::lv_img_create(parent.get_handle());
             cglue::lv_img_set_src(handle, filepath.as_ptr() as *mut raw::c_void);
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
 
@@ -366,9 +366,9 @@ pub struct LvglTextArea {
 }
 impl_widget_trait!(LvglTextArea, TextArea);
 impl LvglTextArea {
-    pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(parent: &LvglWidget, uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
-            let handle = cglue::lv_textarea_create(cglue::lv_scr_action());
+            let handle = cglue::lv_textarea_create(parent.get_handle());
             cglue::lv_obj_set_style_text_align(handle, cglue::LV_TEXT_ALIGN_CENTER as u8, 0);
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
             cglue::lv_textarea_set_one_line(handle, true);
@@ -426,9 +426,9 @@ pub struct LvglLed {
 }
 impl_widget_trait!(LvglLed, Led);
 impl LvglLed {
-    pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(parent: &LvglWidget, uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
-            let handle = cglue::lv_led_create(cglue::lv_scr_action());
+            let handle = cglue::lv_led_create(parent.get_handle());
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
             cglue::lv_led_off(handle);
 
@@ -492,9 +492,9 @@ pub struct LvglLine {
 }
 impl_widget_trait!(LvglLine, Line);
 impl LvglLine {
-    pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(parent: &LvglWidget, uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
-            let handle = cglue::lv_line_create(cglue::lv_scr_action());
+            let handle = cglue::lv_line_create(parent.get_handle());
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
 
             let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
@@ -556,7 +556,7 @@ pub struct LvglArc {
 }
 impl_widget_trait!(LvglArc, Arc);
 impl LvglArc {
-    pub fn new(
+    pub fn new(parent: &LvglWidget,
         uid: &'static str,
         angle_start: u16,
         angle_end: u16,
@@ -564,7 +564,7 @@ impl LvglArc {
         y_ofs: i16,
     ) -> &'static Self {
         unsafe {
-            let handle = cglue::lv_arc_create(cglue::lv_scr_action());
+            let handle = cglue::lv_arc_create(parent.get_handle());
             cglue::lv_arc_set_bg_angles(handle, angle_start, angle_end);
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
             cglue::lv_obj_clear_flag(handle, cglue::LV_OBJ_FLAG_CLICKABLE);
@@ -647,9 +647,9 @@ pub struct LvglSwitch {
 }
 impl_widget_trait!(LvglSwitch, Switch);
 impl LvglSwitch {
-    pub fn new(uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(parent: &LvglWidget, uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
-            let handle = cglue::lv_switch_create(cglue::lv_scr_action());
+            let handle = cglue::lv_switch_create(parent.get_handle());
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
             cglue::lv_obj_add_state(handle, cglue::LV_STATE_CHECKED as u16);
 
@@ -704,9 +704,9 @@ pub struct LvglBar {
 }
 impl_widget_trait!(LvglBar, Bar);
 impl LvglBar {
-    pub fn new(uid: &'static str, min: i32, max: i32, x_ofs: i16, y_ofs: i16) -> &'static Self {
+    pub fn new(parent: &LvglWidget, uid: &'static str, min: i32, max: i32, x_ofs: i16, y_ofs: i16) -> &'static Self {
         unsafe {
-            let handle = cglue::lv_bar_create(cglue::lv_scr_action());
+            let handle = cglue::lv_bar_create(parent.get_handle());
             cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
             cglue::lv_bar_set_range(handle, min, max);
 
@@ -758,6 +758,36 @@ impl LvglBar {
                 _ => return, // ignore other events
             }
             unsafe { (*ctrlbox).callback(widget, self.uid, event) };
+        }
+    }
+}
+
+pub struct LvglArea {
+    uid: &'static str,
+    info: Cell<&'static str>,
+    handle: *mut cglue::_lv_obj_t,
+    style: *mut cglue::lv_style_t,
+    ctrlbox: Cell<Option<*mut dyn LvglHandler>>,
+}
+impl_widget_trait!(LvglArea, Area);
+impl LvglArea {
+    pub fn new(parent: &LvglWidget, uid: &'static str, x_ofs: i16, y_ofs: i16) -> &'static Self {
+        unsafe {
+            let handle = cglue::lv_obj_create(parent.get_handle());
+            cglue::lv_obj_align(handle, cglue::LV_ALIGN_TOP_LEFT as u8, x_ofs, y_ofs);
+
+            let style = Box::leak(Box::new(mem::zeroed::<cglue::lv_style_t>()));
+            cglue::lv_style_init(style);
+            cglue::lv_obj_add_style(handle, style, 0);
+
+            let widget = LvglArea {
+                uid,
+                info: Cell::new(""),
+                handle,
+                style,
+                ctrlbox: Cell::new(None),
+            };
+            Box::leak(Box::new(widget))
         }
     }
 }
