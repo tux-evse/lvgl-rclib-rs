@@ -14,16 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-use std::any::Any;
 use crate::prelude::*;
+use std::any::Any;
 
 // exported cglue types
-pub type LvglPoint  = cglue::lv_point_t;
-pub type LvglImgDsc= cglue::lv_img_dsc_t;
+pub type LvglPoint = cglue::lv_point_t;
+pub type LvglImgDsc = cglue::lv_img_dsc_t;
 
 // use only for test
 #[allow(dead_code)]
-pub(crate) const PRJ_DIR:&str = cglue::PRJ_DIR;
+pub(crate) const PRJ_DIR: &str = cglue::PRJ_DIR;
 
 pub enum LvglWidget {
     Label(&'static LvglLabel),
@@ -59,9 +59,15 @@ impl LvglWidget {
     }
     pub fn set_callback(&self, ctrlbox: *mut dyn LvglHandler) {
         match self {
-            LvglWidget::Button(this) => this.set_callback(ctrlbox),
-            LvglWidget::PixButton(this) => this.set_callback(ctrlbox),
-            LvglWidget::Switch(this) => this.set_callback(ctrlbox),
+            LvglWidget::Button(this) => {
+                this.set_callback(ctrlbox);
+            }
+            LvglWidget::PixButton(this) => {
+                this.set_callback(ctrlbox);
+            }
+            LvglWidget::Switch(this) => {
+                this.set_callback(ctrlbox);
+            }
             _ => {}
         }
     }
@@ -83,7 +89,7 @@ impl LvglWidget {
             LvglWidget::PixButton(this) => this.get_handle(),
             LvglWidget::Area(this) => this.get_handle(),
 
-            LvglWidget::Display() => {unsafe {cglue::lv_scr_action()}}
+            LvglWidget::Display() => unsafe { cglue::lv_scr_action() },
         }
     }
 
@@ -104,7 +110,7 @@ impl LvglWidget {
             LvglWidget::PixButton(this) => this.as_any(),
             LvglWidget::Area(this) => this.as_any(),
 
-            LvglWidget::Display() => {&0 as &dyn Any}
+            LvglWidget::Display() => &0 as &dyn Any,
         }
     }
 
@@ -125,7 +131,100 @@ impl LvglWidget {
             LvglWidget::PixButton(this) => this.get_uid(),
             LvglWidget::Area(this) => this.get_uid(),
 
-            LvglWidget::Display() => {"Root"}
+            LvglWidget::Display() => "Root",
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+#[allow(non_camel_case_types)]
+pub enum LvglEvent {
+    PRESSED,
+    PRESSING,
+    PRESS_LOST,
+    SHORT_CLICKED,
+    LONG_PRESSED,
+    LONG_PRESSED_REPEAT,
+    CLICKED,
+    RELEASED,
+    FOCUSED,
+    DEFOCUSED,
+    LEAVE,
+    VALUE_CHANGED,
+    UNKNOWN,
+}
+
+impl LvglEvent {
+    pub(crate) fn from(code: u32) -> Self {
+        match code {
+            1 => Self::PRESSED,
+            2 => Self::PRESSING,
+            3 => Self::PRESS_LOST,
+            4 => Self::SHORT_CLICKED,
+            5 => Self::LONG_PRESSED,
+            6 => Self::LONG_PRESSED_REPEAT,
+            7 => Self::CLICKED,
+            8 => Self::RELEASED,
+            14 => Self::FOCUSED,
+            15 => Self::DEFOCUSED,
+            16 => Self::LEAVE,
+            28 => Self::VALUE_CHANGED,
+            _ => Self::UNKNOWN,
+        }
+    }
+}
+
+pub struct LvglStates {
+    pub(crate)handle: cglue::lv_state_t,
+}
+
+#[allow(non_camel_case_types)]
+pub enum LvglState {
+    DEFAULT,
+    CHECKED,
+    FOCUSED,
+    FOCUS_KEY,
+    EDITED,
+    HOVERED,
+    PRESSED,
+    SCROLLED,
+    DISABLED,
+    USER_1,
+    USER_2,
+    USER_3,
+    USER_4,
+    UNKNOWN,
+}
+
+impl LvglState {
+    pub(crate) fn get_raw(&self) -> u16 {
+        let value= match self {
+            LvglState::DEFAULT => cglue::LV_STATE_DEFAULT,
+            LvglState::CHECKED => cglue::LV_STATE_CHECKED,
+            LvglState::FOCUSED => cglue::LV_STATE_FOCUSED,
+            LvglState::FOCUS_KEY => cglue::LV_STATE_FOCUS_KEY,
+            LvglState::EDITED => cglue::LV_STATE_EDITED,
+            LvglState::HOVERED => cglue::LV_STATE_HOVERED,
+            LvglState::PRESSED => cglue::LV_STATE_PRESSED,
+            LvglState::SCROLLED => cglue::LV_STATE_SCROLLED,
+            LvglState::DISABLED => cglue::LV_STATE_DISABLED,
+            LvglState::USER_1 => cglue::LV_STATE_USER_1,
+            LvglState::USER_2 => cglue::LV_STATE_USER_2,
+            LvglState::USER_3 => cglue::LV_STATE_USER_3,
+            LvglState::USER_4 => cglue::LV_STATE_USER_4,
+
+            _ => 0,
+        };
+        value as u16
+    }
+}
+
+impl LvglStates {
+    pub fn check(&self, state: LvglState) -> bool {
+        if (state.get_raw() & self.handle) != 0 {
+            true
+        } else {
+            false
         }
     }
 }

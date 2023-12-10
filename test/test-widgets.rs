@@ -35,15 +35,59 @@ pub fn display_loop() {
     }
 }
 
-struct WidgetEvtCtx {
-    test: &'static str,
+struct ButtonEvtCtx {
+    app_data: &'static str,
 }
 
-impl LvglHandler for WidgetEvtCtx {
-    fn callback(&self, _widget: &LvglWidget, uid: &'static str, event: &LvglEvent) {
+impl LvglHandler for ButtonEvtCtx {
+    fn callback(&self, widget: &LvglWidget, uid: &'static str, event: &LvglEvent) {
+        // ignore any non button widget (should never happen)
+        let _button = match widget.as_any().downcast_ref::<LvglButton>() {
+            Some(widget) => widget,
+            None => return,
+        };
+
         println!(
-            "Callback {{test:{} widget:{}, 'event':{:?}}}",
-            self.test, uid, event
+            "Button-Callback {{app_data:{} widget:{}, 'event':{:?}}}",
+            self.app_data, uid, event,
+        );
+    }
+}
+
+struct PixmapEvtCtx {
+    app_data: &'static str,
+}
+
+impl LvglHandler for PixmapEvtCtx {
+    fn callback(&self, widget: &LvglWidget, uid: &'static str, event: &LvglEvent) {
+        let _pixmap = match widget.as_any().downcast_ref::<LvglPixButton>() {
+            Some(widget) => widget,
+            None => return,
+        };
+        println!(
+            "Pixmap-Callback {{app_data:{} widget:{}, 'event':{:?}}}",
+            self.app_data, uid, event
+        );
+    }
+}
+
+struct SwitchEvtCtx {
+    app_data: &'static str,
+}
+impl LvglHandler for SwitchEvtCtx {
+    fn callback(&self, widget: &LvglWidget, uid: &'static str, event: &LvglEvent) {
+        let switch = match widget.as_any().downcast_ref::<LvglSwitch>() {
+            Some(widget) => widget,
+            None => return,
+        };
+
+        let states = switch.get_states();
+        println!(
+            "Switch-Callback {{app_data:{} widget:{}, 'event':{:?} 'checked':{}}}",
+            self.app_data,
+            uid,
+            event,
+            states.check(LvglState::CHECKED)
         );
     }
 }
@@ -65,25 +109,32 @@ pub fn draw_label(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
 }
 
 pub fn draw_icon(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
-    let area = LvglArea::new(root, "My-Area", x_ofs, y_ofs)
-        .set_size(80, 30)
+    let area = LvglArea::new(root, "Icon-Area", x_ofs, y_ofs)
+        .set_size(80, 40)
         .set_padding(5, 2, 5, 5)
+        .set_title("icon area", 3, 5, LvglMkFont::std_10())
         .finalize();
 
-    LvglPixmap::new(area, "Icon-wifi", LvglIcon::WIFI, 0, 0).set_info("Demo Wifi Icon");
-    LvglPixmap::new(area, "Icon-Nfc", LvglIcon::SD_CARD, 25, 0)
+    LvglPixmap::new(area, "Icon-wifi", LvglIcon::WIFI, 10, 0).set_info("Demo Wifi Icon");
+    LvglPixmap::new(area, "Icon-Nfc", LvglIcon::SD_CARD, 35, 0)
         .set_color(LvglColor::rvb(255, 0, 0));
     LvglPixmap::new(root, "Icon-Battery", LvglIcon::BATTERY_2, 50, 0);
 }
 
 pub fn draw_led(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
-    LvglLed::new(root, "Led-Red", x_ofs, y_ofs)
+    let area = LvglArea::new(root, "Led-Area", x_ofs, y_ofs)
+        .set_size(70, 40)
+        .set_padding(10, 2, 5, 5)
+        .set_title("led area", 7, 7, LvglMkFont::std_10())
+        .finalize();
+
+    LvglLed::new(area, "Led-Red", 10, 0)
         .set_info("red led")
         .set_color(LvglColor::RED())
         .set_size(10, 10)
         .set_on(true);
 
-    LvglLed::new(root, "Led-Green", x_ofs + 25, y_ofs)
+    LvglLed::new(area, "Led-Green", 35, 0)
         .set_color(LvglColor::rvb(0, 255, 0))
         .set_info("green led")
         .set_brightness(255)
@@ -91,25 +142,40 @@ pub fn draw_led(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
         .set_on(true);
 }
 
+pub fn draw_switch(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
+    let area = LvglArea::new(root, "Switch-Area", x_ofs, y_ofs)
+        .set_size(150, 50)
+        .set_padding(5, 2, 5, 10)
+        .set_title("switch area", 35, 5, LvglMkFont::std_10())
+        .finalize();
+
+    LvglSwitch::new(area, "Switch-1", 0, 0)
+        .set_title("Unlock", 3, 5, LvglMkFont::std_10())
+        .set_lock(false)
+        .set_value(false)
+        .set_callback(Box::leak(Box::new(SwitchEvtCtx {
+            app_data: "Draw-Button-1",
+        })))
+        .set_height(20)
+        .finalize();
+
+    LvglSwitch::new(area, "Switch-2", 75, 0)
+        .set_title("Locked", 3, 5, LvglMkFont::std_10())
+        .set_lock(true)
+        .set_value(true)
+        .set_callback(Box::leak(Box::new(SwitchEvtCtx {
+            app_data: "Draw-Button-1",
+        })))
+        .set_height(20)
+        .finalize();
+}
+
 pub fn draw_text(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
     LvglTextArea::new(root, "Text-Area", x_ofs, y_ofs)
         .set_info("Demo Text area Zone")
         .set_width(600)
-        .set_value("display message zone");
-}
-
-pub fn draw_switch(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
-    LvglSwitch::new(root, "Switch-1", x_ofs, y_ofs)
-        .set_title("Unlock", 3, 5, LvglMkFont::std_10())
-        .set_lock(false)
-        .set_value(false)
-        .set_height(20);
-
-    LvglSwitch::new(root, "Switch-2", x_ofs + 75, y_ofs)
-        .set_title("Locked", 3, 5, LvglMkFont::std_10())
-        .set_lock(true)
-        .set_value(true)
-        .set_height(20);
+        .set_value("display message zone")
+        .finalize();
 }
 
 pub fn draw_line(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
@@ -133,9 +199,10 @@ pub fn draw_button(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
         .set_value("Test-1")
         .set_size(180, 100)
         .set_border(3, LvglColor::DEEP_ORANGE())
-        .set_callback(Box::leak(Box::new(WidgetEvtCtx {
-            test: "Draw-Button-1",
-        })));
+        .set_callback(Box::leak(Box::new(ButtonEvtCtx {
+            app_data: "Draw-Button-1",
+        })))
+        .finalize();
 
     LvglButton::new(
         root,
@@ -145,24 +212,27 @@ pub fn draw_button(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
         y_ofs + 110,
     )
     .set_value("Test-2")
-    .set_callback(Box::leak(Box::new(WidgetEvtCtx {
-        test: "Draw-Button-2",
-    })));
+    .set_callback(Box::leak(Box::new(ButtonEvtCtx {
+        app_data: "Draw-Button-2",
+    })))
+    .finalize();
 
     LvglPixButton::new(root, "Button-Img", x_ofs + 50, y_ofs - 60)
         .set_value(LvglIcon::HOME)
         .set_background(LvglColor::BLUE_GREY())
         .set_title("Clickable", -13, 25, LvglMkFont::std_10())
         .set_border(3, LvglColor::DEEP_PURPLE())
-        .set_callback(Box::leak(Box::new(WidgetEvtCtx {
-            test: "Draw-PixButton",
-        })));
+        .set_callback(Box::leak(Box::new(PixmapEvtCtx {
+            app_data: "Draw-PixButton",
+        })))
+        .finalize();
 }
 
 pub fn draw_arc(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
     LvglArc::new(root, "Arc", 0, 300, x_ofs, y_ofs)
         .set_info("Arc widget")
-        .set_value(180);
+        .set_value(180)
+        .finalize();
 }
 
 pub fn draw_tux(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
@@ -186,7 +256,8 @@ pub fn draw_qrcode(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
         y_ofs,
     )
     .set_value("https://github.com/tux-evse")
-    .set_title("tux-evse@github", 15, 15, LvglMkFont::std_14());
+    .set_title("tux-evse@github", 15, 15, LvglMkFont::std_14())
+    .finalize();
 }
 
 pub fn draw_bar(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
@@ -194,13 +265,15 @@ pub fn draw_bar(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
         .set_info("variable bar")
         .set_size(10, 250)
         .set_gradient(true, LvglColor::GREEN(), LvglColor::YELLOW())
-        .set_value(60);
+        .set_value(60)
+        .finalize();
 
     LvglBar::new(root, "Bar-2", 10, 90, x_ofs, y_ofs - 30)
         .set_info("variable bar")
         .set_size(250, 10)
         .set_gradient(false, LvglColor::GREEN(), LvglColor::YELLOW())
-        .set_value(40);
+        .set_value(40)
+        .finalize();
 }
 
 pub fn draw_meter(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
@@ -211,7 +284,8 @@ pub fn draw_meter(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
         .set_zone(80, 100, 4, LvglColor::GREEN())
         .set_border(4, LvglColor::LIGHT_BLUE())
         .set_background(LvglColor::PINK())
-        .set_value(50);
+        .set_value(50)
+        .finalize();
 }
 
 pub fn draw_area(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
@@ -223,11 +297,13 @@ pub fn draw_area(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
         .set_info("variable bar")
         .set_size(10, 250)
         .set_gradient(true, LvglColor::GREEN(), LvglColor::YELLOW())
-        .set_value(60);
+        .set_value(60)
+        .finalize();
 
     LvglArc::new(area, "Arc", 0, 300, 100, 100)
         .set_info("Arc widget")
-        .set_value(180);
+        .set_value(180)
+        .finalize();
 }
 
 #[test]
@@ -331,10 +407,10 @@ pub fn test_pannel() {
     let mut display = display_init();
     display.set_theme(primary, secondary, false, LvglMkFont::std_14());
     let root = display.get_root_widget();
-    draw_icon(root, 900, 5);
-    draw_led(root, 850, 15);
+    draw_icon(root, 875, 5);
+    draw_led(root, 805, 5);
     draw_date(root, 540, 12);
-    draw_switch(root, 825, 40);
+    draw_switch(root, 805, 50);
     draw_line(root, 400, 70);
     draw_button(root, 450, 200);
     draw_arc(root, 100, 30);

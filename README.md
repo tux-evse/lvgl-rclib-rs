@@ -37,6 +37,10 @@ nm /usr/local/lib64/liblv_drivers.so | grep gtk_init
 USE_GTK=1 cargo build
 ```
 
+WARNING: if despite of GTK=1 you still get an error as ```cglue::evdev_init(); not found``` then either:
+* your lv_driver lib was not compiled with GTK
+* you need to touch build.rs to force _capi-map.rs reconstruction
+
 ## Testing widget demo panel
 
 ```
