@@ -34,7 +34,7 @@ pub trait LvglCommon {
     fn get_action(&self) -> &'static str {
         "[]"
     }
-    fn set_callback(&'static self, ctrlbox:*mut dyn LvglHandler) -> &Self;
+    fn set_callback(&'static self, ctrlbox: *mut dyn LvglHandler) -> &Self;
     fn set_info(&self, info: &'static str) -> &Self;
     fn as_any(&self) -> &dyn Any;
 }
@@ -69,7 +69,7 @@ macro_rules! impl_widget_trait {
                 self
             }
             // if callback not set do it
-            fn set_callback(&'static self, ctrlbox: *mut dyn LvglHandler) -> &Self{
+            fn set_callback(&'static self, ctrlbox: *mut dyn LvglHandler) -> &Self {
                 if let None = self.ctrlbox.get() {
                     self.ctrlbox.set(Some(ctrlbox));
                     let context = Box::leak(Box::new(LvglWidget::$object(self)));
@@ -150,7 +150,7 @@ pub trait LvglMethod {
         self
     }
 
-    fn set_padding(&self, top: i16, botton:i16, right:i16, left:i16) -> &Self
+    fn set_padding(&self, top: i16, botton: i16, right: i16, left: i16) -> &Self
     where
         Self: LvglCommon,
     {
@@ -164,14 +164,28 @@ pub trait LvglMethod {
         self
     }
 
+    fn set_disable(&self, lock: bool) -> &Self
+    where
+        Self: LvglCommon,
+    {
+        let handle = self.get_handle();
+        unsafe {
+            if lock {
+                cglue::lv_obj_add_state(handle, cglue::LV_STATE_DISABLED as u16);
+            } else {
+                cglue::lv_obj_clear_state(handle, cglue::LV_STATE_DISABLED as u16);
+            }
+        }
+        self
+    }
+
     fn set_radius(&self) -> &Self
     where
         Self: LvglCommon,
     {
         let handle = self.get_handle();
         unsafe {
-
-                cglue::lv_obj_set_style_radius(
+            cglue::lv_obj_set_style_radius(
                 handle,
                 cglue::LV_RADIUS_CIRCLE as i16,
                 cglue::LV_STATE_DEFAULT,
@@ -225,18 +239,17 @@ pub trait LvglMethod {
         self
     }
 
-
     fn get_states(&self) -> LvglStates
     where
         Self: LvglCommon,
     {
         let handle = self.get_handle();
         unsafe {
-            LvglStates {handle: cglue::lv_obj_get_state(handle)}
+            LvglStates {
+                handle: cglue::lv_obj_get_state(handle),
+            }
         }
     }
-
-
 }
 
 pub struct LvglHandle {

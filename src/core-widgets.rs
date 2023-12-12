@@ -708,16 +708,6 @@ impl LvglSwitch {
         self
     }
 
-    pub fn set_lock(&self, lock: bool) -> &Self {
-        unsafe {
-            if lock {
-                cglue::lv_obj_add_state(self.handle, cglue::LV_STATE_DISABLED as u16);
-            } else {
-                cglue::lv_obj_clear_state(self.handle, cglue::LV_STATE_DISABLED as u16);
-            }
-        }
-        self
-    }
     pub fn callback(&self, widget: &LvglWidget, event: &LvglEvent) {
         if let Some(ctrlbox) = self.ctrlbox.get() {
             match event {
