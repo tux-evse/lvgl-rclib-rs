@@ -151,7 +151,7 @@ pub fn draw_switch(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
 
     LvglSwitch::new(area, "Switch-1", 0, 0)
         .set_title("Unlock", 3, 5, LvglMkFont::std_10())
-        .set_lock(false)
+        .set_disable(false)
         .set_value(false)
         .set_callback(Box::leak(Box::new(SwitchEvtCtx {
             app_data: "Draw-Button-1",
@@ -161,7 +161,7 @@ pub fn draw_switch(root: &LvglWidget, x_ofs: i16, y_ofs: i16) {
 
     LvglSwitch::new(area, "Switch-2", 75, 0)
         .set_title("Locked", 3, 5, LvglMkFont::std_10())
-        .set_lock(true)
+        .set_disable(true)
         .set_value(true)
         .set_callback(Box::leak(Box::new(SwitchEvtCtx {
             app_data: "Draw-Button-1",
