@@ -82,6 +82,8 @@ fn main() {
     cc::Build::new()
         .file("capi/capi-map.c")
         .define("USE_GTK", defined.as_str())
+        .include("/usr/include/lvgl")
+        .include("/usr/include")
         .include("/usr/local/include/lvgl")
         .include("/usr/local/include")
         .compile("lvgl-glue");
