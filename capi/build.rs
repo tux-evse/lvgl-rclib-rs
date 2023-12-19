@@ -56,6 +56,7 @@ fn main() {
     let _capi_map = bindgen::Builder::default()
         .header("capi/capi-map.c")
         .clang_arg("-I/usr/local/include/lvgl")
+        .clang_arg("-I/usr/include/lvgl")
         .clang_arg(use_gtk)
         .clang_arg(use_fbdev)
         .clang_arg(use_evdev)
