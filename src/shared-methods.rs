@@ -348,12 +348,14 @@ impl LvglHandle {
                 font as *const _ as *const cglue::lv_font_t,
             );
             cglue::lv_disp_set_theme(display as *mut cglue::_lv_disp_t, theme);
+            /*
             let cursor_handle = cglue::lv_img_create(cglue::lv_scr_action());
             cglue::lv_img_set_src(
                 cursor_handle,
                 &cglue::lv_mouse_cursor as *const _ as *const raw::c_void,
             );
             cglue::lv_indev_set_cursor(self._mouse_handle, cursor_handle);
+            */
         }
         self
     }
